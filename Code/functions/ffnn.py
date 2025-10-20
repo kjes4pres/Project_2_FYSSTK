@@ -1,5 +1,5 @@
-import autograd.numpy as np  # We need to use this numpy wrapper to make automatic differentiation work later
-from autograd import grad, elementwise_grad
+import autograd.numpy as np  
+from autograd import grad
 
 
 class NeuralNetwork:
