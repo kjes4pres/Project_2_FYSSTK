@@ -159,6 +159,18 @@ class NeuralNetwork:
             grads = self.backpropagation_batch(input,target)
             self.update_weights(grads, 0.1)
             self.training_info["Cost_history"].append(self.cost(input,target))
+            
+    def train_SGD(self, input, target, epochs = 1000, learning_rate = 0.1, batch_size = 10):
+        batches = int(input.shape[0] / batch_size)
+        for epoch in range(epochs):
+            for batch in range(batches):
+                index = np.random.choice(input.shape[0], batch_size, replace=True)
+                X_batch = input[index]
+                y_batch = target[index]
+                grads = self.backpropagation_batch(X_batch,y_batch)
+                self.update_weights(grads, learning_rate)
+            self.training_info["Cost_history"].append(self.cost(input,target))
+
 
     def autograd_compliant_predict(self, layers, inputs):
         pass
