@@ -49,12 +49,12 @@ def derivate(func):
         def der_func(X):
             s = sigmoid(X)
             return s * (1 - s)
+        return der_func  
 
     elif func.__name__ == "identity":
 
         def der_func(X):
             return np.ones(X.shape)
-
         return der_func
 
     else:
