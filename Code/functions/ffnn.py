@@ -22,6 +22,64 @@ class NeuralNetwork:
         self.weights = self.create_layers(network_input_size, layer_output_sizes)
         self.optimization_method = optimization_method
 
+        # Define weight update methods based on optimization method
+        if self.optimization_method == "RMSProp":
+
+            def update_weights(self, layer_grads, learning_rate, beta=0.9, epsilon=1e-8):
+                velocities = [(np.zeros_like(W), np.zeros_like(b)) for (W, b) in self.weights]
+                for i in range(len(self.weights)):
+                    W, b = self.weights[i]
+                    dC_dW, dC_db = layer_grads[i]
+                    vW, vb = velocities[i]
+                    vW = beta * vW + (1 - beta) * (dC_dW ** 2)
+                    vb = beta * vb + (1 - beta) * (dC_db ** 2)
+                    W -= (learning_rate / (np.sqrt(vW) + epsilon)) * dC_dW
+                    b -= (learning_rate / (np.sqrt(vb) + epsilon)) * dC_db
+                    self.weights[i] = (W, b)
+
+        elif self.optimization_method == "Adam":
+
+            def update_weights(self, layer_grads, learning_rate, t, beta1=0.9, beta2=0.999, epsilon=1e-8):
+
+                m = [(np.zeros_like(W), np.zeros_like(b)) for (W, b) in self.weights]
+                v = [(np.zeros_like(W), np.zeros_like(b)) for (W, b) in self.weights]
+
+                for i in range(len(self.weights)):
+                    W, b = self.weights[i]
+                    dC_dW, dC_db = layer_grads[i]
+
+                    m[i, 0] = beta1 * m[i, 0] + (1 - beta1) * dC_dW
+                    v[i, 0] = beta2 * v[i, 0] + (1 - beta2) * (dC_dW ** 2)
+
+                    m[i, 1] = beta1 * m[i, 1] + (1 - beta1) * dC_db
+                    v[i, 1] = beta2 * v[i, 1] + (1 - beta2) * (dC_db ** 2)
+
+                    m_W_hat = m[i, 0] / (1 - beta1 ** (t + 1))
+                    v_W_hat = v[i, 0] / (1 - beta2 ** (t + 1))
+
+                    m_b_hat = m[i, 1] / (1 - beta1 ** (t + 1))
+                    v_b_hat = v[i, 1] / (1 - beta2 ** (t + 1))
+
+                    W -= (learning_rate / (np.sqrt(v_W_hat) + epsilon)) * m_W_hat
+                    b -= (learning_rate / (np.sqrt(v_b_hat) + epsilon)) * m_b_hat
+                    self.weights[i] = (W, b)
+
+                t = t + 1
+
+                return t
+
+        elif self.optimization_method is None:
+            # Standard gradient descent
+            def update_weights(self, layer_grads, learning_rate):
+                for i in range(len(self.weights)):
+                    W, b = self.weights[i]
+                    dC_dW, dC_db = layer_grads[i]
+
+                    W -= learning_rate * dC_dW
+                    b -= learning_rate * dC_db
+
+                    self.weights[i] = (W, b)
+
     def get_weights(self):
         return self.weights
 
@@ -91,63 +149,6 @@ class NeuralNetwork:
 
         return layer_grads
     
-    # Define weight update methods based on optimization method
-    if self.optimization_method == "RMSProp":
-
-        def update_weights(self, layer_grads, learning_rate, beta=0.9, epsilon=1e-8):
-            velocities = [(np.zeros_like(W), np.zeros_like(b)) for (W, b) in self.weights]
-            for i in range(len(self.weights)):
-                W, b = self.weights[i]
-                dC_dW, dC_db = layer_grads[i]
-                vW, vb = velocities[i]
-                vW = beta * vW + (1 - beta) * (dC_dW ** 2)
-                vb = beta * vb + (1 - beta) * (dC_db ** 2)
-                W -= (learning_rate / (np.sqrt(vW) + epsilon)) * dC_dW
-                b -= (learning_rate / (np.sqrt(vb) + epsilon)) * dC_db
-                self.weights[i] = (W, b)
-
-    elif self.optimization_method == "Adam":
-
-        def update_weights(self, layer_grads, learning_rate, t, beta1=0.9, beta2=0.999, epsilon=1e-8):
-
-            m = [(np.zeros_like(W), np.zeros_like(b)) for (W, b) in self.weights]
-            v = [(np.zeros_like(W), np.zeros_like(b)) for (W, b) in self.weights]
-
-            for i in range(len(self.weights)):
-                W, b = self.weights[i]
-                dC_dW, dC_db = layer_grads[i]
-
-                m[i, 0] = beta1 * m[i, 0] + (1 - beta1) * dC_dW
-                v[i, 0] = beta2 * v[i, 0] + (1 - beta2) * (dC_dW ** 2)
-
-                m[i, 1] = beta1 * m[i, 1] + (1 - beta1) * dC_db
-                v[i, 1] = beta2 * v[i, 1] + (1 - beta2) * (dC_db ** 2)
-
-                m_W_hat = m[i, 0] / (1 - beta1 ** (t + 1))
-                v_W_hat = v[i, 0] / (1 - beta2 ** (t + 1))
-
-                m_b_hat = m[i, 1] / (1 - beta1 ** (t + 1))
-                v_b_hat = v[i, 1] / (1 - beta2 ** (t + 1))
-
-                W -= (learning_rate / (np.sqrt(v_W_hat) + epsilon)) * m_W_hat
-                b -= (learning_rate / (np.sqrt(v_b_hat) + epsilon)) * m_b_hat
-                self.weights[i] = (W, b)
-
-            t = t + 1
-
-            return t
-
-    elif self.optimization_method is None:
-        # Standard gradient descent
-        def update_weights(self, layer_grads, learning_rate):
-            for i in range(len(self.weights)):
-                W, b = self.weights[i]
-                dC_dW, dC_db = layer_grads[i]
-
-                W -= learning_rate * dC_dW
-                b -= learning_rate * dC_db
-
-                self.weights[i] = (W, b)
 
     def autograd_compliant_predict(self, layers, inputs):
         pass
