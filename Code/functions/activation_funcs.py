@@ -1,14 +1,61 @@
+import numpy as np  
 
-def ReLU(z):
-    return np.where(z > 0, z, 0)
+# Different activation functions
+def identity(X):
+    return X
 
-# Derivative of the ReLU function
-def ReLU_der(z):
-    return np.where(z > 0, 1, 0)
 
-def sigmoid(z):
-    return 1 / (1 + np.exp(-z))
+def sigmoid(X):
+    try:
+        return 1.0 / (1 + np.exp(-X))
+    except FloatingPointError:
+        return np.where(X > np.zeros(X.shape), np.ones(X.shape), np.zeros(X.shape))
 
-def sigmoid_der(z):
-    s = sigmoid(z)
-    return s * (1 - s)
+
+def RELU(X):
+    return np.where(X > np.zeros(X.shape), X, np.zeros(X.shape))
+
+
+def LRELU(X):
+    delta = 10e-4
+    return np.where(X > np.zeros(X.shape), X, delta * X)
+
+
+def softmax(X):
+    X = X - np.max(X, axis=-1, keepdims=True)
+    delta = 10e-10
+    return np.exp(X) / (np.sum(np.exp(X), axis=-1, keepdims=True) + delta)
+
+
+# Derivatives of the activation functions
+def derivate(func):
+    if func.__name__ == "RELU":
+
+        def der_func(X):
+            return np.where(X > 0, 1, 0)
+
+        return der_func
+
+    elif func.__name__ == "LRELU":
+
+        def der_func(X):
+            delta = 10e-4
+            return np.where(X > 0, 1, delta)
+
+        return der_func
+
+    elif func.__name__ == "sigmoid":
+
+        def der_func(X):
+            s = sigmoid(X)
+            return s * (1 - s)
+
+    elif func.__name__ == "identity":
+
+        def der_func(X):
+            return np.ones(X.shape)
+
+        return der_func
+
+    else:
+        return print("Derivative not implemented for this function.")
