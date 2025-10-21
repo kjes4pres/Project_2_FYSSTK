@@ -25,15 +25,15 @@ class NeuralNetwork:
     def get_weights(self):
         return self.weights
 
-    def feed_forward(self, input, layers, activation_funcs):
-        a = input
+    def feed_forward(self, inputs, layers, activation_funcs):
+        a = inputs
         for (W, b), activation_func in zip(layers, activation_funcs):
             z = a @ W + b
             a = activation_func(z)
         return a
 
-    def cost(self, layers, input, activation_funcs, target):
-        predict = feed_forward(input, layers, activation_funcs)
+    def cost(self, layers, inputs, activation_funcs, target):
+        predict = self.feed_forward(inputs, layers, activation_funcs)
         return self.cost_fun(predict, target)
 
     def _feed_forward_saver(self, inputs, layers, activation_funcs):
@@ -52,6 +52,7 @@ class NeuralNetwork:
         layers = []
 
         i_size = network_input_size
+
         for layer_output_size in layer_output_sizes:
             W = np.random.randn(i_size, layer_output_size)
             b = np.random.randn(layer_output_size, 1)
@@ -63,7 +64,7 @@ class NeuralNetwork:
     def backpropagation_batch(
         self, inputs, layers, activation_funcs, target, activation_ders, cost_der
     ):
-
+        
         layer_inputs, zs, predictions = self._feed_forward_saver(
             inputs, layers, activation_funcs
         )
