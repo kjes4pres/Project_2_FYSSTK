@@ -1,6 +1,6 @@
 import autograd.numpy as np  
 from autograd import grad
-from typing import List, Callable
+from typing import List, Callable, Tuple, Dict, Any
 import numpy.typing as npt
 
 
@@ -9,9 +9,9 @@ class NeuralNetwork:
     def __init__(
         self,
         network_input_size: int,
-        layer_output_sizes: list[int],
-        activation_funcs: list[Callable[[np.ndarray], np.ndarray]],
-        activation_ders: list[Callable[[np.ndarray], np.ndarray]],
+        layer_output_sizes: List[int],
+        activation_funcs: List[Callable[[np.ndarray], np.ndarray]],
+        activation_ders: List[Callable[[np.ndarray], np.ndarray]],
         cost_fun: Callable[[np.ndarray], np.ndarray],
         cost_der: Callable[[np.ndarray], np.ndarray],
         optimization_method: str | None = None,
@@ -27,14 +27,17 @@ class NeuralNetwork:
         self.training_info = {
             "Cost_history" : []
             }
-
-    def get_weights(self):
+    
+    # Returns current weights of the model
+    def get_weights(self) -> List[Tuple[np.ndarray, np.ndarray]]:
         return self.weights
     
-    def get_info(self):
+    # Returns the training info, like cost history and such.
+    def get_info(self) -> Dict[str, Any]:
         return self.training_info
     
-    def create_layers(self, network_input_size, layer_output_sizes):
+    # Creates the weights with prechosen shapes.
+    def create_layers(self, network_input_size: int, layer_output_sizes: List[int]) -> List[Tuple[np.ndarray, np.ndarray]]:
         layers = []
 
         i_size = network_input_size
@@ -46,18 +49,19 @@ class NeuralNetwork:
 
         return layers
     
-    def _feed_forward(self, input):
+    
+    def _feed_forward(self, input: np.ndarray) -> np.ndarray:
         a = input
         for (W, b), activation_func in zip(self.weights, self.activation_funcs):
             z = a @ W + b
             a = activation_func(z)
         return a
 
-    def cost(self, input, target):
+    def cost(self, input: np.ndarray, target: np.ndarray) -> float:
         predict = self._feed_forward(input)
         return self.cost_fun(predict, target)
 
-    def _feed_forward_saver(self, inputs):
+    def _feed_forward_saver(self, inputs: np.ndarray) -> Tuple[List[np.ndarray], List[np.ndarray], np.ndarray]:
         layer_inputs = []
         zs = []
         a = inputs
@@ -71,7 +75,7 @@ class NeuralNetwork:
 
 
 
-    def backpropagation_batch(self, inputs, target):
+    def backpropagation_batch(self, inputs: np.ndarray, target: np.ndarray) -> List[Tuple[np.ndarray, np.ndarray]]:
 
         layer_inputs, zs, predictions = self._feed_forward_saver(inputs)
         batch_size = inputs.shape[0]
@@ -98,10 +102,9 @@ class NeuralNetwork:
 
         return layer_grads
     
-    # Define weight update methods based on optimization method
+    # Weight update methods based on optimization method
 
-
-    def update_weights_RMSProp(self, layer_grads, learning_rate, beta=0.9, epsilon=1e-8):
+    def update_weights_RMSProp(self, layer_grads: List[Tuple[np.ndarray, np.ndarray]], learning_rate: float, beta: float = 0.9, epsilon: float = 1e-8) -> None:
         velocities = [(np.zeros_like(W), np.zeros_like(b)) for (W, b) in self.weights]
         for i in range(len(self.weights)):
             W, b = self.weights[i]
@@ -115,7 +118,7 @@ class NeuralNetwork:
 
     
 
-    def update_weights_Adam(self, layer_grads, learning_rate, t, beta1=0.9, beta2=0.999, epsilon=1e-8):
+    def update_weights_Adam(self, layer_grads: List[Tuple[np.ndarray, np.ndarray]], learning_rate: float, t: int, beta1: float = 0.9, beta2: float = 0.999, epsilon: float = 1e-8) -> int:
 
         m = [(np.zeros_like(W), np.zeros_like(b)) for (W, b) in self.weights]
         v = [(np.zeros_like(W), np.zeros_like(b)) for (W, b) in self.weights]
@@ -146,7 +149,7 @@ class NeuralNetwork:
 
     
         # Standard gradient descent
-    def update_weights(self, layer_grads, learning_rate):
+    def update_weights(self, layer_grads: List[Tuple[np.ndarray, np.ndarray]], learning_rate: float) -> None:
         for i in range(len(self.weights)):
             W, b = self.weights[i]
             dC_dW, dC_db = layer_grads[i]
@@ -156,13 +159,15 @@ class NeuralNetwork:
 
             self.weights[i] = (W, b)
     
-    def train(self, input, target, epochs = 1000, learning_rate = 0.1):
+    # Training by standard gradient descent.
+    def train(self, input: np.ndarray, target: np.ndarray, epochs: int = 1000, learning_rate: float = 0.1) -> None:
         for i in range(epochs):
             grads = self.backpropagation_batch(input,target)
             self.update_weights(grads, 0.1)
             self.training_info["Cost_history"].append(self.cost(input,target))
-            
-    def train_SGD(self, input, target, epochs = 1000, learning_rate = 0.1, batch_size = 10):
+    
+    # Training with stochastic gradient descent.
+    def train_SGD(self, input: np.ndarray, target: np.ndarray, epochs: int = 1000, learning_rate: float = 0.1, batch_size: int = 10) -> None:
         batches = int(input.shape[0] / batch_size)
         for epoch in range(epochs):
             for batch in range(batches):
@@ -179,4 +184,4 @@ class NeuralNetwork:
 
     def autograd_gradient(self, inputs, targets):
         auto_grad = grad(self.cost_fun, 0)
-        return auto_grad(inputs, targets)
+        return auto_grad(inputs, targets)   
