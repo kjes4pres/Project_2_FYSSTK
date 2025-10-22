@@ -1,18 +1,20 @@
 import autograd.numpy as np  
 from autograd import grad
+from typing import List, Callable
+import numpy.typing as npt
 
 
 
 class NeuralNetwork:
     def __init__(
         self,
-        network_input_size,
-        layer_output_sizes,
-        activation_funcs,
-        activation_ders,
-        cost_fun,
-        cost_der,
-        optimization_method=None,
+        network_input_size: int,
+        layer_output_sizes: list[int],
+        activation_funcs: list[Callable[[np.ndarray], np.ndarray]],
+        activation_ders: list[Callable[[np.ndarray], np.ndarray]],
+        cost_fun: Callable[[np.ndarray], np.ndarray],
+        cost_der: Callable[[np.ndarray], np.ndarray],
+        optimization_method: str | None = None,
     ):
         self.cost_der = cost_der
         self.cost_fun = cost_fun

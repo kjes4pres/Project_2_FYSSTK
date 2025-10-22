@@ -28,7 +28,7 @@ def softmax(X):
 
 
 # Derivatives of the activation functions
-def derivate(func):
+def derivate(func: callable):
     if func.__name__ == "RELU":
 
         def der_func(X):
