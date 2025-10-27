@@ -14,7 +14,8 @@ class NeuralNetwork:
         activation_ders: List[Callable[[np.ndarray], np.ndarray]],
         cost_fun: Callable[[np.ndarray], np.ndarray],
         cost_der: Callable[[np.ndarray], np.ndarray],
-        optimization_method: str | None = None,
+        lamb = 0.0,
+        cost_fun_type: str = None
     ):
         self.cost_der = cost_der
         self.cost_fun = cost_fun
@@ -23,7 +24,8 @@ class NeuralNetwork:
         self.layer_output_sizes = layer_output_sizes
         self.network_input_size = network_input_size
         self.weights = self.create_layers(network_input_size, layer_output_sizes)
-        self.optimization_method = optimization_method
+        self.lamb = lamb
+        self.cost_fun_type = cost_fun_type
         self.training_info = {
             "Cost_history" : []
             }
@@ -49,7 +51,6 @@ class NeuralNetwork:
 
         return layers
     
-    
     def _feed_forward(self, input: np.ndarray) -> np.ndarray:
         a = input
         for (W, b), activation_func in zip(self.weights, self.activation_funcs):
@@ -73,8 +74,6 @@ class NeuralNetwork:
             zs.append(z)
         return layer_inputs, zs, a
 
-
-
     def backpropagation_batch(self, inputs: np.ndarray, target: np.ndarray) -> List[Tuple[np.ndarray, np.ndarray]]:
 
         layer_inputs, zs, predictions = self._feed_forward_saver(inputs)
@@ -97,6 +96,12 @@ class NeuralNetwork:
             dC_dW = (layer_input.T @ dC_dz) 
             dC_db = np.mean(dC_dz, axis=0)
             
+            # Applying regularization if specified
+            if self.cost_fun_type == "L1":
+                dC_dW += self.lamb * np.sign(self.weights[i][0])
+
+            if self.cost_fun_type == "L2":
+                dC_dW += 2*self.lamb * self.weights[i][0]
 
             layer_grads[i] = (dC_dW, dC_db)
 
