@@ -50,6 +50,13 @@ def derivate(func: callable):
             s = sigmoid(X)
             return s * (1 - s)
         return der_func  
+    
+    elif func.__name__ == "softmax":
+
+        def der_func(X):
+            s = softmax(X)
+            return np.diag(s) - np.outer(s, s)
+            
 
     elif func.__name__ == "identity":
 
