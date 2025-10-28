@@ -103,6 +103,16 @@ class NeuralNetwork:
             if self.cost_fun_type == "L2":
                 dC_dW += 2*self.lamb * self.weights[i][0]
 
+            # Gradient clipping
+            clip_value = 1.0
+            total_norm = np.sqrt(np.sum(dC_dW ** 2))
+            if total_norm > clip_value:
+                dC_dW *= clip_value / (total_norm + 1e-8)
+
+            total_norm_b = np.sqrt(np.sum(dC_db ** 2))
+            if total_norm_b > clip_value:
+                dC_db *= clip_value / (total_norm_b + 1e-8)
+
             layer_grads[i] = (dC_dW, dC_db)
 
         return layer_grads
