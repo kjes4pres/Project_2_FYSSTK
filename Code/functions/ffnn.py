@@ -66,7 +66,7 @@ class NeuralNetwork:
         return self.cost_fun(predict, target)
 
     def _feed_forward_saver(self, inputs: np.ndarray) -> Tuple[List[np.ndarray], List[np.ndarray], np.ndarray]:
-        layer_inputs = []
+        layer_inputs = [ ]
         zs = []
         a = inputs
 
@@ -92,18 +92,16 @@ class NeuralNetwork:
                 # Last layer: derivative of cost w.r.t activation
                 if self.cost_fun.__name__ == "cross_entropy" and activation_der.__name__ == "softmax_der":
                     dC_dz = prediction - target
-                    print("dC_dz")
                 else:
                     dC_da = self.cost_der(prediction, target) / batch_size
                     dC_dz = dC_da * activation_der(z)
             else:
                 W, _ = self.weights[i + 1]
                 dC_da = dC_dz @ W.T
-                print("dC_da")
+                
                 dC_dz = dC_da * activation_der(z)
         
             dC_dW = (layer_input.T @ dC_dz) 
-            print("dC_dW")
             dC_db = np.mean(dC_dz, axis=0)
             
             # Applying regularization if specified
@@ -122,7 +120,6 @@ class NeuralNetwork:
             total_norm_b = np.sqrt(np.sum(dC_db ** 2))
             if total_norm_b > clip_value:
                 dC_db *= clip_value / (total_norm_b + 1e-8)
-            print("hei")
 
             layer_grads[i] = (dC_dW, dC_db)
 
@@ -193,7 +190,7 @@ class NeuralNetwork:
             self.training_info["Cost_history"].append(self.cost(input,target))
     
     # Training with stochastic gradient descent.
-    def train_SGD(self, input: np.ndarray, target: np.ndarray, epochs: int = 1000, learning_rate: float = 0.1, batch_size: int = 10) -> None:
+    def train_SGD(self, input: np.ndarray, target: np.ndarray, epochs: int = 1000, learning_rate: float = 0.1, batch_size: int = 100) -> None:
         batches = int(input.shape[0] / batch_size)
         for epoch in range(epochs):
             for batch in range(batches):
