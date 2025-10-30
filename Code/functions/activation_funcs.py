@@ -53,10 +53,10 @@ def derivate(func: callable):
     
     elif func.__name__ == "softmax":
 
-        def der_func(X):
+        def softmax_der(X):
             s = softmax(X)
             return np.diag(s) - np.outer(s, s)
-            
+        return softmax_der
 
     elif func.__name__ == "identity":
 

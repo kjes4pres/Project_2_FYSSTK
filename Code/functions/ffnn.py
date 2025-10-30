@@ -38,6 +38,9 @@ class NeuralNetwork:
     def get_info(self) -> Dict[str, Any]:
         return self.training_info
     
+    def get_cost_fun(self):
+        return self.cost_fun
+    
     # Creates the weights with prechosen shapes.
     def create_layers(self, network_input_size: int, layer_output_sizes: List[int]) -> List[Tuple[np.ndarray, np.ndarray]]:
         layers = []
@@ -76,7 +79,7 @@ class NeuralNetwork:
 
     def backpropagation_batch(self, inputs: np.ndarray, target: np.ndarray) -> List[Tuple[np.ndarray, np.ndarray]]:
 
-        layer_inputs, zs, predictions = self._feed_forward_saver(inputs)
+        layer_inputs, zs, prediction = self._feed_forward_saver(inputs)
         batch_size = inputs.shape[0]
 
         layer_grads = [() for l in self.weights]
@@ -87,13 +90,20 @@ class NeuralNetwork:
 
             if i == len(self.weights) - 1:
                 # Last layer: derivative of cost w.r.t activation
-                dC_da = self.cost_der(predictions, target) / batch_size
+                if self.cost_fun.__name__ == "cross_entropy" and activation_der.__name__ == "softmax_der":
+                    dC_dz = prediction - target
+                    print("dC_dz")
+                else:
+                    dC_da = self.cost_der(prediction, target) / batch_size
+                    dC_dz = dC_da * activation_der(z)
             else:
                 W, _ = self.weights[i + 1]
                 dC_da = dC_dz @ W.T
+                print("dC_da")
+                dC_dz = dC_da * activation_der(z)
         
-            dC_dz = dC_da * activation_der(z)
             dC_dW = (layer_input.T @ dC_dz) 
+            print("dC_dW")
             dC_db = np.mean(dC_dz, axis=0)
             
             # Applying regularization if specified
@@ -112,6 +122,7 @@ class NeuralNetwork:
             total_norm_b = np.sqrt(np.sum(dC_db ** 2))
             if total_norm_b > clip_value:
                 dC_db *= clip_value / (total_norm_b + 1e-8)
+            print("hei")
 
             layer_grads[i] = (dC_dW, dC_db)
 
