@@ -26,6 +26,9 @@ class NeuralNetwork:
         self.weights = self.create_layers(network_input_size, layer_output_sizes)
         self.lamb = lamb
         self.cost_fun_type = cost_fun_type
+        self.m = [(np.zeros_like(W), np.zeros_like(b)) for (W, b) in self.weights]
+        self.v = [(np.zeros_like(W), np.zeros_like(b)) for (W, b) in self.weights]
+        self.t = 0
         self.training_info = {
             "Cost_history" : []
             }
@@ -141,34 +144,33 @@ class NeuralNetwork:
 
     
 
-    def update_weights_Adam(self, layer_grads: List[Tuple[np.ndarray, np.ndarray]], learning_rate: float, t: int, beta1: float = 0.9, beta2: float = 0.999, epsilon: float = 1e-8) -> int:
-
-        m = [(np.zeros_like(W), np.zeros_like(b)) for (W, b) in self.weights]
-        v = [(np.zeros_like(W), np.zeros_like(b)) for (W, b) in self.weights]
+    def update_weights_Adam(self, layer_grads: List[Tuple[np.ndarray, np.ndarray]], learning_rate: float, beta1: float = 0.9, beta2: float = 0.999, epsilon: float = 1e-8) -> int:
 
         for i in range(len(self.weights)):
             W, b = self.weights[i]
             dC_dW, dC_db = layer_grads[i]
+            m_W, m_b = self.m[i]
+            v_W, v_b = self.v[i]
+            
+            m_W = beta1 * m_W + (1 - beta1) * dC_dW
+            v_W = beta2 * v_W + (1 - beta2) * (dC_dW ** 2)
+            m_b = beta1 * m_b + (1 - beta1) * dC_db
+            v_b = beta2 * v_b + (1 - beta2) * (dC_db ** 2)
 
-            m[i, 0] = beta1 * m[i, 0] + (1 - beta1) * dC_dW
-            v[i, 0] = beta2 * v[i, 0] + (1 - beta2) * (dC_dW ** 2)
+            m_W_hat = m_W / (1 - beta1 ** (self.t + 1))
+            v_W_hat = v_W / (1 - beta2 ** (self.t + 1))
 
-            m[i, 1] = beta1 * m[i, 1] + (1 - beta1) * dC_db
-            v[i, 1] = beta2 * v[i, 1] + (1 - beta2) * (dC_db ** 2)
-
-            m_W_hat = m[i, 0] / (1 - beta1 ** (t + 1))
-            v_W_hat = v[i, 0] / (1 - beta2 ** (t + 1))
-
-            m_b_hat = m[i, 1] / (1 - beta1 ** (t + 1))
-            v_b_hat = v[i, 1] / (1 - beta2 ** (t + 1))
+            m_b_hat = m_b / (1 - beta1 ** (self.t + 1))
+            v_b_hat = v_b / (1 - beta2 ** (self.t + 1))
 
             W -= (learning_rate / (np.sqrt(v_W_hat) + epsilon)) * m_W_hat
             b -= (learning_rate / (np.sqrt(v_b_hat) + epsilon)) * m_b_hat
+
+            self.m[i] = (m_W, m_b)
+            self.v[i] = (v_W, v_b)
             self.weights[i] = (W, b)
 
-        t = t + 1
-
-        return t
+        self.t += 1
 
     
         # Standard gradient descent
@@ -183,14 +185,19 @@ class NeuralNetwork:
             self.weights[i] = (W, b)
     
     # Training by standard gradient descent.
-    def train(self, input: np.ndarray, target: np.ndarray, epochs: int = 1000, learning_rate: float = 0.1) -> None:
+    def train(self, input: np.ndarray, target: np.ndarray, epochs: int = 1000, learning_rate: float = 0.1, optimizer: str = "gd") -> None:
         for i in range(epochs):
             grads = self.backpropagation_batch(input,target)
-            self.update_weights(grads, 0.1)
+            if optimizer == "Adam":
+                self.update_weights_Adam(grads, learning_rate)
+            elif optimizer == "RMSProp":
+                self.update_weights_RMSProp(grads, learning_rate)
+            else:
+                self.update_weights(grads, learning_rate)
             self.training_info["Cost_history"].append(self.cost(input,target))
     
     # Training with stochastic gradient descent.
-    def train_SGD(self, input: np.ndarray, target: np.ndarray, epochs: int = 1000, learning_rate: float = 0.1, batch_size: int = 100) -> None:
+    def train_SGD(self, input: np.ndarray, target: np.ndarray, epochs: int = 1000, learning_rate: float = 0.1, batch_size: int = 100, optimizer: str = "gd") -> None:
         batches = int(input.shape[0] / batch_size)
         for epoch in range(epochs):
             for batch in range(batches):
@@ -198,7 +205,12 @@ class NeuralNetwork:
                 X_batch = input[index]
                 y_batch = target[index]
                 grads = self.backpropagation_batch(X_batch,y_batch)
-                self.update_weights(grads, learning_rate)
+                if optimizer == "Adam":
+                    self.update_weights_Adam(grads, learning_rate)
+                elif optimizer == "RMSProp":
+                    self.update_weights_RMSProp(grads, learning_rate)
+                else:
+                    self.update_weights(grads, learning_rate)
             self.training_info["Cost_history"].append(self.cost(input,target))
 
 
