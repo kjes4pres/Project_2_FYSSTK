@@ -8,7 +8,7 @@ def f_true(x):
     """
     return 1.0 / (1.0 + 25.0 * x**2)
 
-def make_data(n, seed=seed):
+def make_data(n, seed: int = 42):
     """
     Makes a data set of length n over the Runge function
     for x in (-1, 1). Includes stochastic noise.

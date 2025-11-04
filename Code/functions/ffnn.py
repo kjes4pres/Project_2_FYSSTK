@@ -65,8 +65,8 @@ class NeuralNetwork:
         return a
 
     def cost(self, input: np.ndarray, target: np.ndarray) -> float:
-        predict = self._feed_forward(input)
-        return self.cost_fun(predict, target)
+    
+        return self.cost_fun(input, target)
 
     def _feed_forward_saver(self, inputs: np.ndarray) -> Tuple[List[np.ndarray], List[np.ndarray], np.ndarray]:
         layer_inputs = [ ]
