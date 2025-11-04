@@ -213,6 +213,44 @@ class NeuralNetwork:
                     self.update_weights(grads, learning_rate)
             self.training_info["Cost_history"].append(self.cost(input,target))
 
+    # Options to compare better with other libraries
+    def train_SGD_v2(self, input: np.ndarray, target: np.ndarray, 
+                  epochs: int = 1000, learning_rate: float = 0.1, 
+                  batch_size: int = 100, optimizer: str = "gd", 
+                  shuffle: bool = True, beta1: float = 0.9, 
+                  beta2: float = 0.999, early_stopping: bool = False, 
+                  tolerance: float = 1e-6, replace: bool = False) -> None:
+        batches = int(np.ceil(input.shape[0] / batch_size))
+        previous_cost = float('inf')
+        for epoch in range(epochs):
+            if shuffle:
+                indices = np.random.permutation(input.shape[0])
+                input = input[indices]
+                target = target[indices]
+            for batch in range(batches):
+                if replace:
+                    index = np.random.choice(input.shape[0], batch_size, replace=True)
+                    X_batch = input[index]
+                    y_batch = target[index]
+                else:
+                    start_index = batch * batch_size
+                    end_index = min((batch + 1) * batch_size, input.shape[0])
+                    X_batch = input[start_index:end_index]
+                    y_batch = target[start_index:end_index]
+                grads = self.backpropagation_batch(X_batch, y_batch)
+                if optimizer == "Adam":
+                    self.update_weights_Adam(grads, learning_rate, beta1, beta2)
+                elif optimizer == "RMSProp":
+                    self.update_weights_RMSProp(grads, learning_rate)
+                else:
+                    self.update_weights(grads, learning_rate)
+            current_cost = self.cost(input, target)
+            self.training_info["Cost_history"].append(current_cost)
+            # Check for early stopping
+            if early_stopping and abs(previous_cost - current_cost) < tolerance:
+                print("Early stopping at epoch", epoch)
+                break
+            previous_cost = current_cost
 
     def autograd_compliant_predict(self, layers, inputs):
         pass
