@@ -64,8 +64,14 @@ class NeuralNetwork:
         return a
 
     def cost(self, input: np.ndarray, target: np.ndarray) -> float:
+        if self.cost_fun_type == "L1":
+            reg_term = self.lamb * sum(np.sum(np.abs(W)) for W, b in self.weights)
+        elif self.cost_fun_type == "L2":
+            reg_term = self.lamb * sum(np.sum(W**2) for W, b in self.weights)
+        else:
+            reg_term = 0.0
         predict = self._feed_forward(input)
-        return self.cost_fun(predict, target)
+        return self.cost_fun(predict, target) + reg_term
 
     def _feed_forward_saver(self, inputs: np.ndarray) -> Tuple[List[np.ndarray], List[np.ndarray], np.ndarray]:
         layer_inputs = [ ]
