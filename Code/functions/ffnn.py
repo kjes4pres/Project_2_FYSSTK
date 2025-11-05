@@ -3,7 +3,6 @@ from autograd import grad
 from typing import List, Callable, Tuple, Dict, Any
 import numpy.typing as npt
 
-np.random.seed(42)
 
 class NeuralNetwork:
     def __init__(
