@@ -44,10 +44,13 @@ class NeuralNetwork:
     def get_cost_fun(self):
         return self.cost_fun
     
+    def set_random_seed(self, seed: int) -> None:
+        self.weights = self.create_layers(self.network_input_size, self.layer_output_sizes, seed)
+    
     # Creates the weights with prechosen shapes.
-    def create_layers(self, network_input_size: int, layer_output_sizes: List[int]) -> List[Tuple[np.ndarray, np.ndarray]]:
+    def create_layers(self, network_input_size: int, layer_output_sizes: List[int], seed: int = 2018) -> List[Tuple[np.ndarray, np.ndarray]]:
         layers = []
-
+        np.random.seed(seed)
         i_size = network_input_size
         for layer_output_size in layer_output_sizes:
             W = np.random.randn(i_size, layer_output_size)
