@@ -26,9 +26,6 @@ class NeuralNetwork:
         self.weights = self.create_layers(network_input_size, layer_output_sizes)
         self.lamb = lamb
         self.cost_fun_type = cost_fun_type
-        self.m = [(np.zeros_like(W), np.zeros_like(b)) for (W, b) in self.weights]
-        self.v = [(np.zeros_like(W), np.zeros_like(b)) for (W, b) in self.weights]
-        self.t = 0
         self.training_info = {
             "Cost_history" : []
             }
@@ -134,11 +131,12 @@ class NeuralNetwork:
     # Weight update methods based on optimization method
 
     def update_weights_RMSProp(self, layer_grads: List[Tuple[np.ndarray, np.ndarray]], learning_rate: float, beta: float = 0.9, epsilon: float = 1e-8) -> None:
-        velocities = [(np.zeros_like(W), np.zeros_like(b)) for (W, b) in self.weights]
+        if not hasattr(self, 'velocities'):
+            self.velocities = [(np.zeros_like(W), np.zeros_like(b)) for (W, b) in self.weights]
         for i in range(len(self.weights)):
             W, b = self.weights[i]
             dC_dW, dC_db = layer_grads[i]
-            vW, vb = velocities[i]
+            vW, vb = self.velocities[i]
             vW = beta * vW + (1 - beta) * (dC_dW ** 2)
             vb = beta * vb + (1 - beta) * (dC_db ** 2)
             W -= (learning_rate / (np.sqrt(vW) + epsilon)) * dC_dW
@@ -148,7 +146,12 @@ class NeuralNetwork:
     
 
     def update_weights_Adam(self, layer_grads: List[Tuple[np.ndarray, np.ndarray]], learning_rate: float, beta1: float = 0.9, beta2: float = 0.999, epsilon: float = 1e-8) -> int:
-
+        if not hasattr(self, 't'):
+            self.t = 0
+        if not hasattr(self, 'm'):
+            self.m = [(np.zeros_like(W), np.zeros_like(b)) for (W, b) in self.weights]
+        if not hasattr(self, 'v'):
+            self.v = [(np.zeros_like(W), np.zeros_like(b)) for (W, b) in self.weights]
         for i in range(len(self.weights)):
             W, b = self.weights[i]
             dC_dW, dC_db = layer_grads[i]
