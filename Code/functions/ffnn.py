@@ -27,7 +27,8 @@ class NeuralNetwork:
         self.cost_fun_type = cost_fun_type
         self.training_info = {
             "Cost_history" : [],
-            "RMSProp_velocities": []
+            "RMSProp_velocities_layer1": [],
+            "RMSProp_velocities_layer2": []
             }
     
     # Returns current weights of the model
@@ -146,7 +147,9 @@ class NeuralNetwork:
             vW = beta * vW + (1 - beta) * (dC_dW ** 2)
             vb = beta * vb + (1 - beta) * (dC_db ** 2)
             if i == 0:
-                self.training_info["RMSProp_velocities"].append(np.mean(vW))
+                self.training_info["RMSProp_velocities_layer1"].append(np.mean(vW))
+            if i == 1:
+                self.training_info["RMSProp_velocities_layer2"].append(np.mean(vW))
             W -= (learning_rate / (np.sqrt(vW) + epsilon)) * dC_dW
             b -= (learning_rate / (np.sqrt(vb) + epsilon)) * dC_db
             self.velocities[i] = (vW, vb)
