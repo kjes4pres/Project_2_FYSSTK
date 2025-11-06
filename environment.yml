@@ -5,9 +5,14 @@ dependencies:
   - python=
   - notebook
   - ipykernel
+  - autograd
+  - scikit-learn
   - pip
   - pip:
     - matplotlib
     - numpy
     - pandas
     - xarray
+    - keras
+    - tensorflow
+    - torch
