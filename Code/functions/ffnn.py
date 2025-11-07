@@ -233,10 +233,8 @@ class NeuralNetwork:
                   epochs: int = 1000, learning_rate: float = 0.1, 
                   batch_size: int = 100, optimizer: str = "gd", 
                   shuffle: bool = True, beta1: float = 0.9, 
-                  beta2: float = 0.999, early_stopping: bool = False, 
-                  tolerance: float = 1e-6, replace: bool = False) -> None:
+                  beta2: float = 0.999, replace: bool = False) -> None:
         batches = int(np.ceil(input.shape[0] / batch_size))
-        previous_cost = float('inf')
         for epoch in range(epochs):
             if shuffle:
                 indices = np.random.permutation(input.shape[0])
@@ -259,13 +257,7 @@ class NeuralNetwork:
                     self.update_weights_RMSProp(grads, learning_rate)
                 else:
                     self.update_weights(grads, learning_rate)
-            current_cost = self.cost(input, target)
-            self.training_info["Cost_history"].append(current_cost)
-            # Check for early stopping
-            if early_stopping and abs(previous_cost - current_cost) < tolerance:
-                print("Early stopping at epoch", epoch)
-                break
-            previous_cost = current_cost
+            self.training_info["Cost_history"].append(self.cost(input, target))
 
     def autograd_compliant_predict(self, layers, inputs):
         pass
