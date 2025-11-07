@@ -16,10 +16,11 @@ Functions and modules used for obtaining the results:
 * `Code/functions/data_maker.py`: description. 
 * `Code/functions/ffnn.py`: Python module containing our neural network class.
 * `Code/functions/runge.py`: description. 
+* `Code/functions/ffnn_lib_funcs.py`: Functions for using different libraries to compare to our FFNN. 
 
 Notebooks for running the code and plotting:
 * `Code/main/b.ipynb`: description
-* `Code/main/c.ipynb`: description
+* `Code/main/c.ipynb`: Comparison of our FFNN to Sckit-Learn, PyTorch and TensorFlow-Keras. Also comparing our derivatives to Autograd.
 * `Code/main/d_and_e.ipynb`: Jupyter notebook which assesses the impact of activation functions, number of hidden layers and number of nodes in the neural network performance on predicting the 1D Runge function. It also investigates the impact of added norms to the perfomance, and compares this to results from Project 1. 
 * `Code/main/f.ipynb`: description
 
