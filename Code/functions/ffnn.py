@@ -38,7 +38,7 @@ class NeuralNetwork:
     def get_info(self) -> Dict[str, Any]:
         return self.training_info
     
-    def get_cost_fun(self):
+    def get_cost_fun(self) -> Callable[[np.ndarray], np.ndarray]:
         return self.cost_fun
     
     def set_random_seed(self, seed: int) -> None:
