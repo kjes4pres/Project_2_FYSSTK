@@ -13,33 +13,12 @@ The repository is organized as follows:
 Functions and modules used for obtaining the results:
 * `Code/functions/activation_funcs.py`: Python module containing functions for different activation functions used in the hidden layers of the neural network, and their derivatives. 
 * `Code/functions/cost_functions.py`: Python module containing functions for different cost functions used in theneural network, and their derivatives. 
-* `Code/functions/data_maker.py`: description. 
 * `Code/functions/ffnn.py`: Python module containing our neural network class.
-* `Code/functions/runge.py`: description. 
+* `Code/functions/runge.py`: Module returning the Runge function. 
 * `Code/functions/ffnn_lib_funcs.py`: Functions for using different libraries to compare to our FFNN. 
 
 Notebooks for running the code and plotting:
-* `Code/main/b.ipynb`: description
+* `Code/main/b.ipynb`: Analysis of our FNNN on the Runge function and comparison to OLS.
 * `Code/main/c.ipynb`: Comparison of our FFNN to Sckit-Learn, PyTorch and TensorFlow-Keras. Also comparing our derivatives to Autograd.
 * `Code/main/d_and_e.ipynb`: Jupyter notebook which assesses the impact of activation functions, number of hidden layers and number of nodes in the neural network performance on predicting the 1D Runge function. It also investigates the impact of added norms to the perfomance, and compares this to results from Project 1. 
-* `Code/main/f.ipynb`: description
-
-**Using functions:** 
-
-If using .py-files:
-    To use the functions package in your own folder, paste:
-
-    from functions import *
-
-    in your file, then run your code in terminal from the code from root "../Code/":
-
-    python -m Sverre.test *or* python -m your_folder.your_file
-
-Elif using .ipynb-files:
-    Paste this into your notebook with your other packages:
-        import sys, os
-
-        project_root = os.path.abspath(os.path.join(os.getcwd(), '..'))
-        sys.path.append(project_root)
-
-        from functions import *
+* `Code/main/f.ipynb`: Notebook for analysis of our NN on the MNIST dataset.
