@@ -8,7 +8,7 @@ This is a collaboration repository for project 2 in FYS-STK4155. The aim of this
 A `requirements.txt` file is located in the repository. To reproduce our results, use the packages listed here. To install the packages, download the `requirements.txt` file, open your terminal and locate your project repository where you placed the downloaded file, in the command line write "´pip install -r requirements.txt´" or if you're using a conda environment type `conda install --file requirements.txt`.
 
 ### Overview of contents
-The repository is organized as follows:
+The repository is organized with folder structure. `Code/functions` contain the functions and classes of the project. `Code/main` holds the Jupyter notebooks we use to train our FFNN, analyze and visualize the results. Plots are found in `Figures`.
 
 Functions and modules used for obtaining the results:
 * `Code/functions/activation_funcs.py`: Python module containing functions for different activation functions used in the hidden layers of the neural network, and their derivatives. 
